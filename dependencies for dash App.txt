@@ -1,0 +1,3 @@
+pip install dash plotly pandas numpy
+
+pip install dash-bootstrap-components
