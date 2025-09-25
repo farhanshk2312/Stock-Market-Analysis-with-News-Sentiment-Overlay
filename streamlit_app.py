@@ -22,7 +22,6 @@ def load_data():
         SELECT * FROM `project-portfolio-473015.stock_data_append.stock_news`
     """).to_dataframe()
     
-    # Preprocess news
     df_news = df_news.drop_duplicates(subset=['id']).reset_index(drop=True)
     news_expanded = df_news.explode('insights').reset_index(drop=True)
     news_expanded['sentiment'] = news_expanded['insights'].apply(lambda x: x.get('sentiment') if isinstance(x, dict) else np.nan)
@@ -30,11 +29,9 @@ def load_data():
     news_expanded = news_expanded.dropna(subset=['sentiment','ticker'])
     news_expanded['date'] = pd.to_datetime(news_expanded['published_utc']).dt.date
 
-    # Preprocess stock
     df_stock['ts'] = pd.to_datetime(df_stock['ts'])
     df_stock['date'] = df_stock['ts'].dt.date
 
-    # Compute daily sentiment scores
     daily_sentiment = news_expanded.groupby(['ticker','date'])['sentiment'].apply(list).reset_index()
     
     def sentiment_score(lst):
@@ -43,7 +40,6 @@ def load_data():
     daily_sentiment['sentiment_score'] = daily_sentiment['sentiment'].apply(sentiment_score)
     daily_sentiment['news_count'] = daily_sentiment['sentiment'].apply(len)
 
-    # Merge stock and sentiment
     merged = pd.merge(df_stock, daily_sentiment, left_on=['symbol','date'], right_on=['ticker','date'], how='left')
     merged['sentiment_score'] = merged['sentiment_score'].fillna(0)
     merged['news_count'] = merged['news_count'].fillna(0)
@@ -55,10 +51,8 @@ merged, news_expanded = load_data()
 # --- Streamlit UI ---
 st.title("Stock Price with News Sentiment")
 
-# Select ticker
 available_tickers = merged['symbol'].unique()
 selected_ticker = st.selectbox("Select Ticker", available_tickers)
-
 df_ticker = merged[merged['symbol']==selected_ticker]
 
 # --- Plot candlestick + sentiment ---
@@ -71,7 +65,6 @@ fig = go.Figure(data=[go.Candlestick(
     name='Price'
 )])
 
-# Add sentiment markers
 fig.add_trace(go.Scatter(
     x=df_ticker['ts'],
     y=df_ticker['close'] + 2,
@@ -104,19 +97,17 @@ if clicked_points:
 else:
     clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
 
-# --- Clickable news table ---
+# --- Display news for clicked date ---
 st.subheader("News Details")
-# clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
-
 day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded['ticker']==selected_ticker)]
 
 if day_news.empty:
     st.info(f"No news found for {selected_ticker} on {clicked_date}")
 else:
-    # Display news in a table
     day_news_display = day_news[['ticker','title','sentiment','article_url']].copy()
     day_news_display['sentiment'] = day_news_display['sentiment'].map(
         lambda x: f"🟢 {x}" if x=='positive' else f"🔴 {x}" if x=='negative' else x
     )
     day_news_display['article_url'] = day_news_display['article_url'].apply(lambda x: f"[Link]({x})" if x else "#")
     st.dataframe(day_news_display, use_container_width=True)
+
