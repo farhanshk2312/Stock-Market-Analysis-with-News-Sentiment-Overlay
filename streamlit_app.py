@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from google.cloud import bigquery
 from google.oauth2 import service_account
+import streamlit.components.v1 as components
 
 # --- Initialize BigQuery client with Streamlit secrets ---
 gcp_info = st.secrets["gcp"]
@@ -105,7 +106,7 @@ day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded[
 if day_news.empty:
     st.info(f"No news found for {selected_ticker} on {clicked_date}")
 else:
-    # Build HTML table for news with links opening in new tab
+    # Build HTML table
     table_html = '<table style="width:100%; border-collapse: collapse;">'
     table_html += """
     <tr>
@@ -115,7 +116,7 @@ else:
         <th style="border: 1px solid black; padding: 4px;">Link</th>
     </tr>
     """
-    
+
     for _, row in day_news.iterrows():
         sentiment_color = "green" if row['sentiment']=='positive' else "red" if row['sentiment']=='negative' else "gray"
         link = f'<a href="{row.get("article_url","#")}" target="_blank">Link</a>'
@@ -127,8 +128,7 @@ else:
             <td style="border: 1px solid black; padding: 4px;">{link}</td>
         </tr>
         """
-    
     table_html += "</table>"
-    
-    # Render using st.markdown with unsafe HTML
-    st.markdown(table_html, unsafe_allow_html=True)
+
+    # Render using components.html for full HTML support
+    components.html(table_html, height=300, scrolling=True)
