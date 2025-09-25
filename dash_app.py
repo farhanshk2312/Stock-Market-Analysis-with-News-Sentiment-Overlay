@@ -7,22 +7,15 @@ from dash import dcc, html
 from dash.dependencies import Input, Output
 from google.cloud import bigquery
 from google.oauth2 import service_account
-import streamlit as st
-from streamlit.components.v1 import iframe
-
-# Load the service account info from Streamlit secrets
-gcp_info = st.secrets["gcp"]
-
-credentials = service_account.Credentials.from_service_account_info(gcp_info)
-
-bq_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+# import streamlit as st
+# from streamlit.components.v1 import iframe
 
 # Read credentials JSON from env var
-# creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
-# credentials = service_account.Credentials.from_service_account_info(creds_dict)
+creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+credentials = service_account.Credentials.from_service_account_info(creds_dict)
 
 # Init BigQuery client
-# bq_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+bq_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
 
 # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"D:\Projects\Profile\Polygon_project\Stock-Market-Analysis-with-News-Sentiment-Overlay\project-portfolio-473015-eedb2f040835.json"
 # bq_client = bigquery.Client()
@@ -201,5 +194,5 @@ if __name__ == "__main__":
     ),
     height=600,
 )
-    # app.run_server(host="0.0.0.0", port=8080, debug=True)
+    app.run_server(host="0.0.0.0", port=8080, debug=True)
     # app.run_server(debug=True)
