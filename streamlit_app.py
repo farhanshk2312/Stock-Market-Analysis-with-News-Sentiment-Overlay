@@ -96,7 +96,7 @@ fig.update_layout(
     xaxis_title='Date',
     yaxis_title='Price',
     xaxis_rangeslider_visible=False,
-    hovermode='x unified'
+    hovermode='x unified',
      font=dict(
         family="Segoe UI, sans-serif",  # Standardize font
         size=12,
