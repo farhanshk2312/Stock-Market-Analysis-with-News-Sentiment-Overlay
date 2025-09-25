@@ -1,6 +1,9 @@
-google-cloud-bigquery==3.* 
-requests>=2.28
-pandas>=1.5
-streamlit>=1.18
-python-dotenv
+dash
+dash-bootstrap-components
+pandas
 plotly
+numpy
+requests
+google-cloud-bigquery
+pyarrow
+gunicorn
