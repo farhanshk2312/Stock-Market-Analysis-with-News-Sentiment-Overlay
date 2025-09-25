@@ -6,6 +6,11 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 import streamlit.components.v1 as components
 
+st.set_page_config(
+    page_title="Stock Price with News Sentiment",
+    layout="wide"  # This makes the app use the full browser width
+)
+
 # --- Initialize BigQuery client with Streamlit secrets ---
 gcp_info = st.secrets["gcp"]
 credentials = service_account.Credentials.from_service_account_info(gcp_info)
