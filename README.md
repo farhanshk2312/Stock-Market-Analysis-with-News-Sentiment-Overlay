@@ -4,9 +4,10 @@
 
 This project focuses on analyzing the daily price trends of top stocks by market capitalization along with related news articles. The aim is to explore how news sentiment impacts stock prices and provide an interactive visualization for deeper insights.
 
-## Data Source
 
-Source: [Polygon.io](https://polygon.io/) REST API
+Data Source: [Polygon.io](https://polygon.io/) REST API
+
+Streamlit app: https://stock-market-analysis-with-news-sentiment-overlay-ufobcpvhn6pp.streamlit.app
 
 ## Data Collected:
 
