@@ -117,7 +117,7 @@ if day_news.empty:
     st.info(f"No news found for {selected_ticker} on {clicked_date}")
 else:
     # Build HTML table
-    table_html = '<table style="width:100%; border-collapse: collapse;">'
+    table_html = '<table style=width:100%; border:1px solid black; border-collapse:collapse; font-family:Segoe UI, sans-serif;>'
     table_html += """
     <tr>
         <th style="border: 1px solid black; padding: 4px;">Ticker</th>
