@@ -1,12 +1,20 @@
-import os
+import os, json
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"D:\Projects\Profile\Polygon_project\Stock-Market-Analysis-with-News-Sentiment-Overlay\project-portfolio-473015-eedb2f040835.json"
-bq_client = bigquery.Client()
+# Read credentials JSON from env var
+creds_dict = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+credentials = service_account.Credentials.from_service_account_info(creds_dict)
+
+# Init BigQuery client
+bq_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
+
+# os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"D:\Projects\Profile\Polygon_project\Stock-Market-Analysis-with-News-Sentiment-Overlay\project-portfolio-473015-eedb2f040835.json"
+# bq_client = bigquery.Client()
 
 # Load stock data
 df_stock = bq_client.query("""
