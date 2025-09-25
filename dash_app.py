@@ -60,6 +60,9 @@ merged['news_count'] = merged['news_count'].fillna(0)
 # --- Initialize Dash app ---
 app = Dash(__name__)
 
+# Expose the server for deployment
+server = app.server   
+
 # Get unique tickers from the stock data
 available_tickers = df_stock['symbol'].unique()
 
