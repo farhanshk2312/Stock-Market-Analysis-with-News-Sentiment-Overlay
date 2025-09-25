@@ -145,7 +145,7 @@ def update_chart(selected_ticker):
         xaxis_title='Date',
         yaxis_title='Price',
         xaxis_rangeslider_visible=False,
-        hovermode='x unified'
+        hovermode='x unified',
         height=800
     )
     
