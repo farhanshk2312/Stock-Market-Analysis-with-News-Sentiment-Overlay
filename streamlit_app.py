@@ -131,4 +131,4 @@ else:
     table_html += "</table>"
 
     # Render using components.html for full HTML support
-    components.html(table_html, hwidth="100%", height=400, scrolling=True)
+    components.html(table_html, width="100%", height=400, scrolling=True)
