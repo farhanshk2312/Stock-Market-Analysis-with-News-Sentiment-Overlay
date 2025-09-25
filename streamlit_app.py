@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from google.cloud import bigquery
 from google.oauth2 import service_account
+from streamlit_plotly_events import plotly_events
 
 # --- Initialize BigQuery client with Streamlit secrets ---
 gcp_info = st.secrets["gcp"]
@@ -93,12 +94,19 @@ fig.update_layout(
     hovermode='x unified'
 )
 
-# Render chart
-selected_point = st.plotly_chart(fig, use_container_width=True)
+# --- Streamlit Plotly events ---
+st.subheader("Candlestick Chart")
+clicked_points = plotly_events(fig, click_event=True, hover_event=False)
+
+# Determine the clicked date
+if clicked_points:
+    clicked_date = pd.to_datetime(clicked_points[0]['x']).date()
+else:
+    clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
 
 # --- Clickable news table ---
 st.subheader("News Details")
-clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
+# clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
 
 day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded['ticker']==selected_ticker)]
 
