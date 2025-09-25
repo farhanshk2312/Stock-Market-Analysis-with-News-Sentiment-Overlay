@@ -1,9 +1,11 @@
+import os
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 from google.cloud import bigquery
 
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"D:\Projects\Profile\Polygon_project\Stock-Market-Analysis-with-News-Sentiment-Overlay\project-portfolio-473015-eedb2f040835.json"
 bq_client = bigquery.Client()
 
 # Load stock data
@@ -173,4 +175,5 @@ def display_news(clickData, selected_ticker):
 
 # --- Run the Dash app ---
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(host="0.0.0.0", port=8080, debug=True)
+    # app.run_server(debug=True)
