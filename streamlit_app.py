@@ -55,6 +55,10 @@ available_tickers = merged['symbol'].unique()
 selected_ticker = st.selectbox("Select Ticker", available_tickers)
 df_ticker = merged[merged['symbol']==selected_ticker]
 
+# Convert numeric columns
+for col in ['open','high','low','close']:
+    df_ticker[col] = pd.to_numeric(df_ticker[col], errors='coerce')
+
 # --- Plot candlestick + sentiment ---
 fig = go.Figure(data=[go.Candlestick(
     x=df_ticker['ts'],
@@ -86,9 +90,6 @@ fig.update_layout(
     xaxis_rangeslider_visible=False,
     hovermode='x unified'
 )
-
-# Render chart
-selected_point = st.plotly_chart(fig, use_container_width=True)
 
 # --- Streamlit Plotly events ---
 st.subheader("Candlestick Chart")
