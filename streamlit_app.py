@@ -106,15 +106,16 @@ if day_news.empty:
     st.info(f"No news found for {selected_ticker} on {clicked_date}")
 else:
     # Build HTML table for news with links opening in new tab
-    table_html = """
-    <table style="width:100%; border-collapse: collapse;">
-        <tr>
-            <th style="border: 1px solid black; padding: 4px;">Ticker</th>
-            <th style="border: 1px solid black; padding: 4px;">Headline</th>
-            <th style="border: 1px solid black; padding: 4px;">Sentiment</th>
-            <th style="border: 1px solid black; padding: 4px;">Link</th>
-        </tr>
+    table_html = '<table style="width:100%; border-collapse: collapse;">'
+    table_html += """
+    <tr>
+        <th style="border: 1px solid black; padding: 4px;">Ticker</th>
+        <th style="border: 1px solid black; padding: 4px;">Headline</th>
+        <th style="border: 1px solid black; padding: 4px;">Sentiment</th>
+        <th style="border: 1px solid black; padding: 4px;">Link</th>
+    </tr>
     """
+    
     for _, row in day_news.iterrows():
         sentiment_color = "green" if row['sentiment']=='positive' else "red" if row['sentiment']=='negative' else "gray"
         link = f'<a href="{row.get("article_url","#")}" target="_blank">Link</a>'
@@ -126,5 +127,8 @@ else:
             <td style="border: 1px solid black; padding: 4px;">{link}</td>
         </tr>
         """
+    
     table_html += "</table>"
+    
+    # Render using st.markdown with unsafe HTML
     st.markdown(table_html, unsafe_allow_html=True)
