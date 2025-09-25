@@ -89,7 +89,7 @@ fig.update_layout(
 
 # --- Streamlit Plotly events ---
 st.subheader("Candlestick Chart")
-clicked_points = plotly_events(fig, click_event=True, hover_event=False)
+clicked_points = plotly_events(fig, click_event=True, hover_event=False,  select_event=False)
 
 # Determine the clicked date
 if clicked_points:
