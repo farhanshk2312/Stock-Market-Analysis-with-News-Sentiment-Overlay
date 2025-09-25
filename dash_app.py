@@ -146,6 +146,7 @@ def update_chart(selected_ticker):
         yaxis_title='Price',
         xaxis_rangeslider_visible=False,
         hovermode='x unified'
+        height=800
     )
     
     return fig
