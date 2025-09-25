@@ -7,9 +7,11 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 import streamlit as st
 
-credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp"]
-)
+# Load the service account info from Streamlit secrets
+gcp_info = st.secrets["gcp"]
+
+credentials = service_account.Credentials.from_service_account_info(gcp_info)
+
 bq_client = bigquery.Client(credentials=credentials, project=credentials.project_id)
 
 # Read credentials JSON from env var
