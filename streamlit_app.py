@@ -97,6 +97,11 @@ fig.update_layout(
     yaxis_title='Price',
     xaxis_rangeslider_visible=False,
     hovermode='x unified'
+     font=dict(
+        family="Segoe UI, sans-serif",  # Standardize font
+        size=12,
+        color="black"
+    )
 )
 
 # Render chart
