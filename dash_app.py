@@ -2,10 +2,13 @@ import os, json
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash
+from dash import html
+from dash.dependencies import Input, Output
 from google.cloud import bigquery
 from google.oauth2 import service_account
 import streamlit as st
+from streamlit.components.v1 import iframe
 
 # Load the service account info from Streamlit secrets
 gcp_info = st.secrets["gcp"]
@@ -25,6 +28,7 @@ bq_client = bigquery.Client(credentials=credentials, project=credentials.project
 # bq_client = bigquery.Client()
 
 # Load stock data
+
 df_stock = bq_client.query("""
     SELECT * FROM `project-portfolio-473015.stock_data_append.stock_daily`
 """).to_dataframe()
@@ -191,5 +195,11 @@ def display_news(clickData, selected_ticker):
 
 # --- Run the Dash app ---
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8080, debug=True)
+    st.components.v1.html(
+    '<iframe srcdoc="{0}" width="100%" height="600"></iframe>'.format(
+        app.index()
+    ),
+    height=600,
+)
+    # app.run_server(host="0.0.0.0", port=8080, debug=True)
     # app.run_server(debug=True)
