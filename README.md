@@ -50,17 +50,19 @@ Data loaded into Python using Pandas for cleaning, transformation, and explorato
 
 ## Visualization
 
-1. Interactive Dash App (Plotly Dash):
+1. Interactive Streamlit app - simpler deployment.
 
 2. Displays candlestick charts for stock price trends.
 
 3. Overlay sentiment markers for each day with corresponding positive or negative news.
+   
+4. Date input instead of marker click → more reliable in Streamlit.
 
-4. Hover tooltips show sentiment scores for quick inspection.
+5. Hover tooltips show sentiment scores for quick inspection.
 
-5. Interactive filter to select specific tickers for comparison.
+6. Interactive filter to select specific tickers for comparison.
 
-6. News details table below the chart shows article metadata for drill-through analysis.
+7. News details table below the chart shows article information with hyperlinks.
 
 
 
