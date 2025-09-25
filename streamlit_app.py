@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 import streamlit as st
 from google.cloud import bigquery
 from google.oauth2 import service_account
-from streamlit_plotly_events import plotly_events
 
 # --- Initialize BigQuery client with Streamlit secrets ---
 gcp_info = st.secrets["gcp"]
@@ -94,23 +93,22 @@ fig.update_layout(
     hovermode='x unified'
 )
 
-# --- Capture click events ---
-clicked_points = plotly_events(fig, click_event=True, hover_event=False)
+# Render chart
+selected_point = st.plotly_chart(fig, use_container_width=True)
 
+# --- Clickable news table ---
 st.subheader("News Details")
+clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
 
-if clicked_points:
-    clicked_date = pd.to_datetime(clicked_points[0]['x']).date()
-    day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded['ticker']==selected_ticker)]
+day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded['ticker']==selected_ticker)]
 
-    if day_news.empty:
-        st.info(f"No news found for {selected_ticker} on {clicked_date}")
-    else:
-        day_news_display = day_news[['ticker','title','sentiment','article_url']].copy()
-        day_news_display['sentiment'] = day_news_display['sentiment'].map(
-            lambda x: f"🟢 {x}" if x=='positive' else f"🔴 {x}" if x=='negative' else x
-        )
-        day_news_display['article_url'] = day_news_display['article_url'].apply(lambda x: f"[Link]({x})" if x else "#")
-        st.dataframe(day_news_display, use_container_width=True)
+if day_news.empty:
+    st.info(f"No news found for {selected_ticker} on {clicked_date}")
 else:
-    st.info("Click on a marker to see news details for that day.")
+    # Display news in a table
+    day_news_display = day_news[['ticker','title','sentiment','article_url']].copy()
+    day_news_display['sentiment'] = day_news_display['sentiment'].map(
+        lambda x: f"🟢 {x}" if x=='positive' else f"🔴 {x}" if x=='negative' else x
+    )
+    day_news_display['article_url'] = day_news_display['article_url'].apply(lambda x: f"[Link]({x})" if x else "#")
+    st.dataframe(day_news_display, use_container_width=True)
