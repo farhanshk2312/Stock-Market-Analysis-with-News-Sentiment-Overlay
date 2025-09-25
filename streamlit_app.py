@@ -105,11 +105,26 @@ day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded[
 if day_news.empty:
     st.info(f"No news found for {selected_ticker} on {clicked_date}")
 else:
-    # Display news in a table
-    day_news_display = day_news[['ticker','title','sentiment','article_url']].copy()
-    day_news_display['sentiment'] = day_news_display['sentiment'].map(
-        lambda x: f"🟢 {x}" if x=='positive' else f"🔴 {x}" if x=='negative' else x
-    )
-    day_news_display['article_url'] = day_news_display['article_url'].apply(lambda x: f"[Link]({x})" if x else "#")
-    st.dataframe(day_news_display, use_container_width=True)
-
+    # Build HTML table for news with links opening in new tab
+    table_html = """
+    <table style="width:100%; border-collapse: collapse;">
+        <tr>
+            <th style="border: 1px solid black; padding: 4px;">Ticker</th>
+            <th style="border: 1px solid black; padding: 4px;">Headline</th>
+            <th style="border: 1px solid black; padding: 4px;">Sentiment</th>
+            <th style="border: 1px solid black; padding: 4px;">Link</th>
+        </tr>
+    """
+    for _, row in day_news.iterrows():
+        sentiment_color = "green" if row['sentiment']=='positive' else "red" if row['sentiment']=='negative' else "gray"
+        link = f'<a href="{row.get("article_url","#")}" target="_blank">Link</a>'
+        table_html += f"""
+        <tr>
+            <td style="border: 1px solid black; padding: 4px;">{row['ticker']}</td>
+            <td style="border: 1px solid black; padding: 4px;">{row['title']}</td>
+            <td style="border: 1px solid black; padding: 4px; color:{sentiment_color};">{row['sentiment']}</td>
+            <td style="border: 1px solid black; padding: 4px;">{link}</td>
+        </tr>
+        """
+    table_html += "</table>"
+    st.markdown(table_html, unsafe_allow_html=True)
