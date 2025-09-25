@@ -87,6 +87,9 @@ fig.update_layout(
     hovermode='x unified'
 )
 
+# Render chart
+selected_point = st.plotly_chart(fig, use_container_width=True)
+
 # --- Streamlit Plotly events ---
 st.subheader("Candlestick Chart")
 clicked_points = plotly_events(fig, click_event=True, hover_event=False,  select_event=False)
