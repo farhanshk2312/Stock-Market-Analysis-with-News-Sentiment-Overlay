@@ -7,7 +7,7 @@ This project focuses on analyzing the daily price trends of top stocks by market
 
 Data Source: [Polygon.io](https://polygon.io/) REST API
 
-Streamlit app: https://stock-market-analysis-with-news-sentiment-overlay-ufobcpvhn6pp.streamlit.app
+Plotly Dash app on render: https://stock-market-analysis-with-news-sentiment.onrender.com
 
 ## Data Collected:
 
@@ -51,13 +51,13 @@ Data loaded into Python using Pandas for cleaning, transformation, and explorato
 
 ## Visualization
 
-1. Interactive Streamlit app - simpler deployment.
+1. Interactive Plotly Dash app deployed on Render.
 
 2. Displays candlestick charts for stock price trends.
 
 3. Overlay sentiment markers for each day with corresponding positive or negative news.
    
-4. Date input instead of marker click → more reliable in Streamlit.
+4. Clickable chart markers which filter down related news.
 
 5. Hover tooltips show sentiment scores for quick inspection.
 
