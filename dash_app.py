@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 from dash import Dash
-from dash import html
+from dash import dcc, html
 from dash.dependencies import Input, Output
 from google.cloud import bigquery
 from google.oauth2 import service_account
