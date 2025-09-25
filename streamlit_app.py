@@ -1,11 +1,9 @@
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from dash import Dash, dcc, html
-from dash.dependencies import Input, Output
+import streamlit as st
 from google.cloud import bigquery
 from google.oauth2 import service_account
-import streamlit as st
 
 # --- Initialize BigQuery client with Streamlit secrets ---
 gcp_info = st.secrets["gcp"]
@@ -37,7 +35,7 @@ def load_data():
 
     # Compute daily sentiment scores
     daily_sentiment = news_expanded.groupby(['ticker','date'])['sentiment'].apply(list).reset_index()
-
+    
     def sentiment_score(lst):
         return sum(1 if s=='positive' else -1 if s=='negative' else 0 for s in lst)
 
@@ -53,100 +51,64 @@ def load_data():
 
 merged, news_expanded = load_data()
 
-# --- Initialize Dash app ---
-app = Dash(__name__)
-server = app.server  # Required for deployment
+# --- Streamlit UI ---
+st.title("Stock Price with News Sentiment")
 
-# Dropdown options
+# Select ticker
 available_tickers = merged['symbol'].unique()
-tickers_options = [{'label': t, 'value': t} for t in available_tickers]
+selected_ticker = st.selectbox("Select Ticker", available_tickers)
 
-app.layout = html.Div([
-    html.H2("Stock Price with News Sentiment"),
-    html.Div([
-        html.Label("Select Ticker:"),
-        dcc.Dropdown(
-            id='ticker-filter',
-            options=tickers_options,
-            value=available_tickers[0],
-            clearable=False
-        )
-    ], style={'width': '200px', 'margin-bottom': '20px'}),
-    dcc.Graph(id='candlestick-chart'),
-    html.H4("News Details"),
-    html.Div(id='news-table')
-])
+df_ticker = merged[merged['symbol']==selected_ticker]
 
-# --- Callbacks ---
-@app.callback(
-    Output('candlestick-chart', 'figure'),
-    Input('ticker-filter', 'value')
+# --- Plot candlestick + sentiment ---
+fig = go.Figure(data=[go.Candlestick(
+    x=df_ticker['ts'],
+    open=df_ticker['open'],
+    high=df_ticker['high'],
+    low=df_ticker['low'],
+    close=df_ticker['close'],
+    name='Price'
+)])
+
+# Add sentiment markers
+fig.add_trace(go.Scatter(
+    x=df_ticker['ts'],
+    y=df_ticker['close'] + 2,
+    mode='markers',
+    marker=dict(
+        size=10,
+        color=['green' if s>0 else 'red' if s<0 else 'gray' for s in df_ticker['sentiment_score']],
+        symbol='diamond'
+    ),
+    hovertext=[f"Sentiment Score: {s}<br>News Count: {c}" 
+               for s, c in zip(df_ticker['sentiment_score'], df_ticker['news_count'])],
+    name='News Sentiment'
+))
+
+fig.update_layout(
+    title=f'{selected_ticker} Daily Price with Sentiment',
+    xaxis_title='Date',
+    yaxis_title='Price',
+    xaxis_rangeslider_visible=False,
+    hovermode='x unified'
 )
-def update_chart(selected_ticker):
-    df_ticker = merged[merged['symbol']==selected_ticker]
-    
-    fig = go.Figure(data=[go.Candlestick(
-        x=df_ticker['ts'],
-        open=df_ticker['open'],
-        high=df_ticker['high'],
-        low=df_ticker['low'],
-        close=df_ticker['close'],
-        name='Price'
-    )])
-    
-    # Add sentiment markers
-    fig.add_trace(go.Scatter(
-        x=df_ticker['ts'],
-        y=df_ticker['close'] + 2,
-        mode='markers',
-        marker=dict(
-            size=10,
-            color=['green' if s>0 else 'red' if s<0 else 'gray' for s in df_ticker['sentiment_score']],
-            symbol='diamond'
-        ),
-        hovertext=[f"Sentiment: {s}<br>News: {c}" 
-                   for s, c in zip(df_ticker['sentiment_score'], df_ticker['news_count'])],
-        name='News Sentiment'
-    ))
-    
-    fig.update_layout(
-        title=f'{selected_ticker} Daily Price with Sentiment',
-        xaxis_title='Date',
-        yaxis_title='Price',
-        xaxis_rangeslider_visible=False,
-        hovermode='x unified'
+
+# Render chart
+selected_point = st.plotly_chart(fig, use_container_width=True)
+
+# --- Clickable news table ---
+st.subheader("News Details")
+clicked_date = st.date_input("Select Date", value=df_ticker['date'].max())
+
+day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded['ticker']==selected_ticker)]
+
+if day_news.empty:
+    st.info(f"No news found for {selected_ticker} on {clicked_date}")
+else:
+    # Display news in a table
+    day_news_display = day_news[['ticker','title','sentiment','article_url']].copy()
+    day_news_display['sentiment'] = day_news_display['sentiment'].map(
+        lambda x: f"🟢 {x}" if x=='positive' else f"🔴 {x}" if x=='negative' else x
     )
-    return fig
-
-@app.callback(
-    Output('news-table', 'children'),
-    [Input('candlestick-chart', 'clickData'),
-     Input('ticker-filter', 'value')]
-)
-def display_news(clickData, selected_ticker):
-    if clickData is None:
-        return "Click on a marker to see news details for that day."
-    
-    clicked_date = pd.to_datetime(clickData['points'][0]['x']).date()
-    day_news = news_expanded[(news_expanded['date']==clicked_date) & (news_expanded['ticker']==selected_ticker)]
-    
-    if day_news.empty:
-        return f"No news found for {selected_ticker} on {clicked_date}"
-
-    return html.Table([
-        html.Tr([html.Th("Ticker"), html.Th("Headline"), html.Th("Sentiment"), html.Th("Link")])] +
-        [html.Tr([
-            html.Td(row['ticker']),
-            html.Td(row['title']),
-            html.Td(row['sentiment'], style={'color':'green' if row['sentiment']=='positive' else 'red' if row['sentiment']=='negative' else 'gray'}),
-            html.Td(html.A("Link", href=row.get('article_url','#'), target="_blank"))
-        ]) for _, row in day_news.iterrows()],
-        style={'width':'100%','border':'1px solid black','border-collapse':'collapse'}
-    )
-
-# --- Render Dash app inside Streamlit ---
-st.title("Stock Price & News Sentiment Dashboard")
-st.components.v1.html(
-    '<iframe srcdoc="{0}" width="100%" height="600"></iframe>'.format(app.index()),
-    height=600,
-)
+    day_news_display['article_url'] = day_news_display['article_url'].apply(lambda x: f"[Link]({x})" if x else "#")
+    st.dataframe(day_news_display, use_container_width=True)
